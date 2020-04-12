@@ -2,14 +2,18 @@ import errors from '@xboxreplay/errors';
 import axios from 'axios';
 import xboxLiveConfig from './config';
 import commonConfig from '../../config';
+import { createProofKey, createRequestSignature } from './signing';
 
 import {
 	ExchangeRpsTicketResponse,
 	AuthenticateResponse,
 	ExchangeResponse,
 	TokensExchangeProperties,
-	TokensExchangeOptions
+	TokensExchangeOptions,
+	AuthenticateDeviceResponse
 } from '../..';
+
+//#region public methods
 
 export const exchangeRpsTicketForUserToken = (
 	RpsTicket: string
@@ -117,3 +121,49 @@ export const exchangeUserTokenForXSTSIdentity = <T extends ExchangeResponse>(
 	options: TokensExchangeOptions
 ): Promise<T | AuthenticateResponse> =>
 	exchangeTokensForXSTSIdentity<T>({ userToken }, options);
+
+//#endregion
+//#region public work in progress methods
+
+export const authenticateDevice = (): Promise<AuthenticateDeviceResponse> => {
+	const requestBody = {
+		RelyingParty: 'http://auth.xboxlive.com',
+		TokenType: 'JWT',
+		Properties: {
+			AuthMethod: 'ProofOfPossession',
+			Id: '362194C6-D6F5-469C-9E80-9F687D489D32',
+			DeviceType: 'iOS',
+			Version: '13.3.1',
+			ProofKey: createProofKey('', '')
+		}
+	};
+
+	const signature = createRequestSignature(
+		xboxLiveConfig.uris.deviceAuthenticate,
+		'POST',
+		requestBody,
+		null
+	);
+
+	return axios
+		.post(xboxLiveConfig.uris.deviceAuthenticate, requestBody, {
+			headers: {
+				...commonConfig.request.baseHeaders,
+				Accept: 'application/json',
+				Signature: signature,
+				'x-xbl-contract-version': 1
+			}
+		})
+		.then(response => {
+			if (response.status !== 200)
+				throw errors.internal('Device authentication failed.');
+			else return response.data as AuthenticateDeviceResponse;
+		})
+		.catch(err => {
+			console.error(err);
+			if (!!err.__XboxReplay__) throw err;
+			else throw errors.internal(err.message);
+		});
+};
+
+//#endregion

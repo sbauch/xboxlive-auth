@@ -57,6 +57,10 @@ export type ExchangeRpsTicketResponse = ExchangeResponse & {
 	DisplayClaims: { xui: [{ uhs: string }] };
 };
 
+export type AuthenticateDeviceResponse = ExchangeResponse & {
+	DisplayClaims: { xdi: { did: string; dcs: string } };
+};
+
 export type AuthenticateResponse = {
 	userXUID: string | null;
 	userHash: string;

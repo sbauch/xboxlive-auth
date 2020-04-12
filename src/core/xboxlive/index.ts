@@ -110,7 +110,7 @@ export const exchangeTokensForXSTSIdentity = <T extends ExchangeResponse>(
 
 				// prettier-ignore
 				if (isDefaultRelyingParty === false)
-			computedErrorMessage.splice(1, 0, 'double check the specified "XSTSRelyingParty" or');
+					computedErrorMessage.splice(1, 0, 'double check the specified "XSTSRelyingParty" or');
 
 				throw errors.internal(computedErrorMessage.join(' '));
 			} else throw errors.internal(err.message);

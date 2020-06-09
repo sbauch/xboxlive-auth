@@ -3,7 +3,7 @@ import axios from 'axios';
 import liveConfig from './config';
 import commonConfig from '../../config';
 import { PreAuthResponse, Credentials, LogUserResponse } from '../..';
-import { stringify, parse } from 'querystring';
+import { stringify, parse } from 'query-string';
 
 //#region typings
 
